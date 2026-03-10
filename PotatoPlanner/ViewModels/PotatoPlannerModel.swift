@@ -13,14 +13,11 @@ final class PotatoPlannerModel: ObservableObject {
     private let store: PlannerStateStorage
     
     init (store: PlannerStateStorage = .shared) {
-//        // Uncomment below to reset storage
-//        try? FileManager.default.removeItem(
-//                    at: FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-//                        .appendingPathComponent("plannerstate.json")
-//                )
-        
         self.store = store
-        
+        self.state = Self.makeInitialState(using: store)
+    }
+    
+    private static func makeInitialState(using store: PlannerStateStorage) -> PlannerState {
         var loaded = store.load()
         
         if loaded.potatoes.isEmpty {
@@ -37,14 +34,22 @@ final class PotatoPlannerModel: ObservableObject {
             loaded.activePotatoID = starterPotato.id
         }
         
-        self.state = loaded
+        return loaded
     }
     
-    // MARK: Private helper to save state
+    // MARK: Private helpers to save state
     private func persist() {
         store.save(state)
     }
     
+    private func update(_ change: (inout PlannerState) -> (Void)) {
+        change(&state)
+        persist()
+    }
+}
+
+// MARK: computed properties
+extension PotatoPlannerModel {
     var activePotato: Potato? {
         state.potatoes.first {$0.id == state.activePotatoID}
     }
@@ -53,44 +58,55 @@ final class PotatoPlannerModel: ObservableObject {
         state.potatoes.first { $0.typeID == potatoType.id }
     }
     
-    // MARK: Public mutation funcs
+    func isPotatoEquiped(potato: Potato) -> Bool{
+        potato.id == state.activePotatoID
+    }
+}
+    
+// MARK: Public mutation funcs
+extension PotatoPlannerModel {
     func addTask(title: String, description: String?, allocatedSeconds: Int, scheduledDate: Date) {
-        state.appendTask(
-            title: title,
-            description: description,
-            allocatedSeconds: allocatedSeconds,
-            scheduledDate: scheduledDate,
-        )
-        persist()
+        update{state in
+            state.appendTask(
+                title: title,
+                description: description,
+                allocatedSeconds: allocatedSeconds,
+                scheduledDate: scheduledDate,
+            )
+        }
     }
     
     func editTask(task: Task, title: String, description: String?, allocatedSeconds: Int, scheduledDate: Date) {
-        state.updateTask(
-            id: task.id,
-            title: title,
-            description: description,
-            allocatedSeconds: allocatedSeconds,
-            scheduledDate: scheduledDate,
-        )
-        persist()
+        update{ state in
+            state.updateTask(
+                id: task.id,
+                title: title,
+                description: description,
+                allocatedSeconds: allocatedSeconds,
+                scheduledDate: scheduledDate,
+            )
+        }
     }
     
     func deleteTask(task: Task) {
-        state.delTask(id: task.id)
-        persist()
+        update{state in state.delTask(id: task.id)}
     }
     
+}
+
+
+// MARK: Session funcs
+extension PotatoPlannerModel {
     func startSession(task: Task) {
-        state.startSession(for: task.id)
-        persist()
+        update{state in state.startSession(for: task.id)}
     }
     
     func finishSession() {
-        state.finishSession()
-        persist()
+        update{state in state.finishSession()}
     }
 }
 
+// MARK: Scheduler funcs
 extension PotatoPlannerModel {
     func isScheduled(on day: Date, calendar: Calendar = .current) -> [Task] {
         state.tasks.filter { task in
@@ -102,22 +118,23 @@ extension PotatoPlannerModel {
         let scheduledTasks = isScheduled(on: day)
         return scheduledTasks.reduce(0) { $0 + $1.allocatedSeconds }
     }
+    
+    func completedDailyFocusTime(on day: Date) -> Int {
+        let scheduledTasks = isScheduled(on: day)
+        return scheduledTasks.reduce(0) { $0 + $1.completedSeconds }
+    }
 }
 
+
+// MARK: potato funcs
 extension PotatoPlannerModel {
-    func isPotatoEquiped(potato: Potato) -> Bool{
-        potato.id == state.activePotatoID
-    }
     
     func equipPotato(potato: Potato) {
-        state.activePotatoID = potato.id
-        persist()
+        update{state in state.activePotatoID = potato.id}
     }
-}
-
-extension PotatoPlannerModel {
+    
     func buyPotato(of potatoType: PotatoType) {
-        state.buyPotato(of: potatoType)
-        persist()
+        update{state in state.buyPotato(of: potatoType)}
     }
+
 }

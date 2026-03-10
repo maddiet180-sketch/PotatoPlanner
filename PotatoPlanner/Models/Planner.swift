@@ -140,21 +140,23 @@ extension PlannerState {
         spuds += seconds / secondsPerSpud
         
         // Update potato specific features (level, fertilizer, etc.)
-        guard let activePotatoID = activePotatoID else { return }
+        guard let activePotatoID,
+              let index = potatoes.firstIndex(where: {$0.id == activePotatoID}) else {return}
         
-        if let index = potatoes.firstIndex(where: { $0.id == activePotatoID }) {
-            potatoes[index].fertilizer += seconds / secondsPerFertilizer
-            
-            let activePotatoTypeID = potatoes[index].typeID
-            if let activePotatoType = PotatoCatalog.kind(for: activePotatoTypeID) {
-                let fertilizerNeeded = activePotatoType.fertilizerNeeded(for: potatoes[index].level)
-                
-                if potatoes[index].fertilizer >= fertilizerNeeded {
-                    if !potatoes[index].isMaxLevel { // Don't add fertilizer if maxed
-                        potatoes[index].level += 1
-                        potatoes[index].fertilizer = abs(fertilizerNeeded - potatoes[index].fertilizer)
-                    }
-                }
+        // Update potato level to reflect fertilizer gained
+        guard !potatoes[index].isMaxLevel else {return}
+        
+        potatoes[index].fertilizer += seconds / secondsPerFertilizer
+        
+        guard let activePotatoType = PotatoCatalog.kind(for: potatoes[index].typeID) else {return}
+        
+        while !potatoes[index].isMaxLevel {
+            let neededFertilizer = activePotatoType.fertilizerNeeded(for: potatoes[index].level)
+            if potatoes[index].fertilizer >= neededFertilizer {
+                potatoes[index].level += 1
+                potatoes[index].fertilizer -= neededFertilizer
+            } else {
+                break
             }
         }
     }

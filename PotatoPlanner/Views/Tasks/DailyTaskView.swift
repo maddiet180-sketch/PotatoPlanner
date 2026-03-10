@@ -63,21 +63,33 @@ struct DailyTasks: View {
     }
     
     private var mainListHeader: some View {
-        HStack {
-            Spacer()
-            dateNavButton(direction: "left")
-            Spacer()
-            VStack(alignment: .center) {
-                Text(selectedDate.wrappedValue.ttyOrMediumDate())
-                    .font(.title2)
-                Text("\(potatoViewModel.totalDailyFocusTime(on: selectedDate.wrappedValue).asHMS) scheduled")
-                    .foregroundStyle(.secondary)
+        VStack {
+            HStack {
+                Spacer()
+                dateNavButton(direction: "left")
+                Spacer()
+                VStack(alignment: .center) {
+                    Text(selectedDate.wrappedValue.ttyOrMediumDate())
+                        .font(.title2)
+                    Text("\(potatoViewModel.totalDailyFocusTime(on: selectedDate.wrappedValue).asHMS) scheduled")
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                dateNavButton(direction: "right")
+                Spacer()
             }
-            Spacer()
-            dateNavButton(direction: "right")
-            Spacer()
+            .padding(.top, 10)
+            
+            ProgressView(value: dailyProgress)
+                .tint(.accentColor2B)
         }
-        .padding(.top, 10)
+    }
+    
+    private var dailyProgress: Double {
+        let completed = Double(potatoViewModel.completedDailyFocusTime(on: selectedDate.wrappedValue))
+        let total = Double(potatoViewModel.totalDailyFocusTime(on: selectedDate.wrappedValue))
+        guard total > 0 else { return 0 }
+        return completed / total
     }
     
     private var calendarListHeader: some View {

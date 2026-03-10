@@ -23,7 +23,7 @@ struct PotatoInfo: View {
                 Text(String(potatoType.plantType))
                     .font(style == .detailed ? .body.italic() : .caption.italic())
                     .fontWeight(.regular)
-                Text(potato.isMaxLevel ? "Max Level" : "Level: \(potato.level) / \(potatoType.maxLevel)")
+                Text(potato.isMaxLevel ? "Max Level (\(potatoType.maxLevel)/\(potatoType.maxLevel))" : "Level: \(potato.level) / \(potatoType.maxLevel)")
                     .font(style == .detailed ? .body : .caption)
                     .foregroundStyle(.secondary)
                 
