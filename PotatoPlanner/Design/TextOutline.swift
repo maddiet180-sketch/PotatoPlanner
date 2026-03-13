@@ -7,6 +7,9 @@
 
 import SwiftUI
 
+// View modifier to outline text. Addapted from the article "How to Create Outlined Text in SwiftUI"
+// written by Garejakirit on Medium.
+
 struct TextStrokeModifier: ViewModifier {
     var strokeSize: CGFloat = 2
     var strokeColor: Color = .primaryText

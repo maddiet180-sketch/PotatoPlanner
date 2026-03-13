@@ -16,18 +16,20 @@ extension Date {
         } else if calendar.isDateInTomorrow(self) {
             return "Tomorrow"
         } else {
-            return Date.mediumFormatter.string(from: self)
+            return mediumFormated(self)
         }
     }
 
     var mediumDate: String {
-        Date.mediumFormatter.string(from: self)
+        mediumFormated(self)
     }
     
-    private static let mediumFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter
-    }()
+    private func mediumFormated(_ date: Date) -> String {
+        String(date.formatted(
+            .dateTime
+                .weekday(.wide)
+                .month(.abbreviated)
+                .day()
+        ))
+    }
 }

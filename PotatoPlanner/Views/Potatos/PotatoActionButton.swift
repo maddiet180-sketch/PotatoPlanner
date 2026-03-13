@@ -8,9 +8,10 @@
 import SwiftUI
 
 struct PotatoActionButton: View {
-    @EnvironmentObject var potatoViewModel: PotatoPlannerModel
+    @Environment(PotatoPlannerStore.self) var store
     let potatoType: PotatoType
     let style: ButtonStyle
+    var onBuyTapped: (() -> Void)? = nil
     
     enum ButtonStyle {
         case compact
@@ -18,8 +19,8 @@ struct PotatoActionButton: View {
     }
     
     private var actionType: ActionType {
-        if let ownedPotato = potatoViewModel.ownedPotato(for: potatoType) {
-            return potatoViewModel.isPotatoEquiped(potato: ownedPotato) ? .equipped : .equip(ownedPotato)
+        if let ownedPotato = store.ownedPotato(for: potatoType) {
+            return store.isEquipped(ownedPotato) ? .equipped : .equip(ownedPotato)
         } else {
             return .buy
         }
@@ -27,7 +28,7 @@ struct PotatoActionButton: View {
     
     private enum ActionType {
         case buy
-        case equip(Potato)
+        case equip(PotatoEntity)
         case equipped
         
         var title: String {
@@ -119,7 +120,7 @@ struct PotatoActionButton: View {
     private var isDisabled: Bool {
         switch actionType {
         case .buy:
-            return potatoViewModel.state.spuds < potatoType.cost
+            return store.spuds < potatoType.cost
         case .equip:
             return false
         case .equipped:
@@ -130,10 +131,9 @@ struct PotatoActionButton: View {
     private func performAction() {
         switch actionType {
         case .buy:
-            potatoViewModel.buyPotato(of: potatoType)
-            break
+            onBuyTapped?()
         case .equip(let potato):
-            potatoViewModel.equipPotato(potato: potato)
+            store.equipPotato(potato)
         case .equipped:
             break
         }

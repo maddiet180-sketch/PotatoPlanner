@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct MonthlyCalendarView: View {
-    @EnvironmentObject var potatoViewModel: PotatoPlannerModel
     @State private var currentDate: Date = Date()
     @State private var didAppear = false
     
@@ -29,7 +28,7 @@ struct MonthlyCalendarView: View {
         Text("Plan Ahead")
             .font(.largeTitle.bold())
             .foregroundStyle(.accentColor1C)
-            .textStroke(width: 2, color: .textboxBackground)
+            .textStroke(width: 1, color: .textboxBackground)
     }
     
     private var mainCalendar: some View {
@@ -62,5 +61,6 @@ struct MonthlyCalendarView: View {
 
 #Preview {
     MonthlyCalendarView()
-        .environmentObject(PotatoPlannerModel())
+        .environment(PotatoPlannerStore.preview)  
 }
+

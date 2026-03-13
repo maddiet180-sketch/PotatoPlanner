@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct PotatosView: View {
-    @EnvironmentObject var potatoViewModel: PotatoPlannerModel
     @State var showingDetailedPotatoView: Bool = false
     @State private var selectedPotatoType: PotatoType?
-    
+    @State private var confirmingPotatoType: PotatoType?
+
     var body: some View {
         ScrollView {
             potatoCards
@@ -27,12 +27,28 @@ struct PotatosView: View {
                                    initialPotato: selectedPotatoType ?? PotatoCatalog.starterKind)
             }
         }
+        .overlay {
+            if let potatoType = confirmingPotatoType {
+                ZStack {
+                    Color.primaryText.opacity(0.5)
+                        .ignoresSafeArea()
+                        .onTapGesture { confirmingPotatoType = nil }
+                    PurchaseConfirmationPopup(
+                        isShowing: Binding(
+                            get: { confirmingPotatoType != nil },
+                            set: { if !$0 { confirmingPotatoType = nil } }
+                        ),
+                        potatoType: potatoType
+                    )
+                }
+            }
+        }
     }
-    
+
     private var potatoCards: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 130), spacing: 12)]) {
             ForEach(PotatoCatalog.all) { potatoType in
-                PotatoCardView(potatoType: potatoType)
+                PotatoCardView(potatoType: potatoType, onBuyTapped: { confirmingPotatoType = potatoType })
                     .aspectRatio(2/3, contentMode: .fit)
                     .onTapGesture {
                         showingDetailedPotatoView = true
@@ -45,70 +61,8 @@ struct PotatosView: View {
     }
 }
 
-struct PotatoCardView: View {
-    @EnvironmentObject var potatoViewModel: PotatoPlannerModel
-    let potatoType: PotatoType
-    
-    private var ownedPotato: Potato? {
-        potatoViewModel.ownedPotato(for: potatoType)
-    }
-    
-    private var isOwned: Bool {
-        ownedPotato != nil
-    }
-    
-    var body: some View {
-        ZStack {
-            cardBackground
-            
-            if !isOwned {
-                Color.primaryText.opacity(0.4)
-                    .ignoresSafeArea()
-            }
-            
-            compactCardContent
-            
-            if !isOwned {
-                Image(systemName: "lock.fill")
-                    .foregroundStyle(.textboxBackground)
-                    .font(.title.bold())
-            }
-        }
-    }
-    
-    private var cardBackground: some View {
-        RoundedRectangle(cornerRadius: 12)
-            .fill(.textboxBackground)
-            .stroke(.primaryText, lineWidth: 3)
-    }
-    
-    private var compactCardContent: some View {
-        VStack {
-            if let owned = ownedPotato {
-                Text(owned.name)
-                    .font(.subheadline)
-            } else {
-                Text(potatoType.displayName)
-                    .font(.subheadline)
-            }
-            
-            potatoImage
-                .padding(4)
-            PotatoActionButton(potatoType: potatoType, style: .compact)
-            
-        }
-        .padding()
-    }
-    
-    private var potatoImage: some View {
-        Image(potatoType.imageName(for: ownedPotato?.level ?? 1))
-            .resizable()
-            .scaledToFit()
-    }
-}
-
 #Preview {
     PotatosView()
-        .environmentObject(PotatoPlannerModel())
+        .environment(PotatoPlannerStore.preview)  
 }
 

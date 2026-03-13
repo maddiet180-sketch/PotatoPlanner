@@ -6,33 +6,21 @@
 //
 
 import Foundation
+import SwiftData
 
-struct Task: Identifiable, Codable {
-    let id: UUID
+@Model
+final class TaskEntity: Identifiable {
+    var id: UUID
     var title: String
-    var description: String?
+    var taskDescription: String?
     var allocatedSeconds: Int
     var completedSeconds: Int
     var scheduledDate: Date
-}
-
-// Custom init
-extension Task {
-    init(
-        fromInputTitle rawTitle: String,
-        description rawDescription: String?,
-        allocatedSeconds: Int,
-        id: UUID = UUID(),
-        completedSeconds: Int = 0,
-        scheduledDate:Date,
-    ) {
-        let trimmedTitle = rawTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedDescription = rawDescription?.trimmingCharacters(in: .whitespacesAndNewlines)
-        let finalDescription = (trimmedDescription?.isEmpty == true) ? nil : trimmedDescription
-
+    
+    init(id: UUID, title: String, taskDescription: String? = nil, allocatedSeconds: Int, completedSeconds: Int, scheduledDate: Date) {
         self.id = id
-        self.title = trimmedTitle
-        self.description = finalDescription
+        self.title = title
+        self.taskDescription = taskDescription
         self.allocatedSeconds = allocatedSeconds
         self.completedSeconds = completedSeconds
         self.scheduledDate = scheduledDate
@@ -40,16 +28,20 @@ extension Task {
 }
 
 // Calculated vars
-extension Task {
+extension TaskEntity {
     var isComplete: Bool {
         completedSeconds >= allocatedSeconds
     }
     var allocatedMinutes: Int { allocatedSeconds / 60 }
     var completedMinutes: Int { completedSeconds / 60 }
+    
+    var clampedCompletedSeconds: Int {
+        min((max(0, completedSeconds)), allocatedSeconds)
+    }
 }
 
 // Conversion helpers
-extension Task {
+extension TaskEntity {
     func totalSeconds(including currentSessionSeconds: Int) -> Int {
         completedSeconds + currentSessionSeconds
     }
@@ -59,17 +51,15 @@ extension Task {
     }
 }
 
-// Preview
-extension Task {
-    static let preview = Task(
+extension TaskEntity {
+    static let preview = TaskEntity(
         id: UUID(),
-        title: "Study Swift",
-        description: "Work on lecture",
-        allocatedSeconds: 1500,
+        title: "Test Task",
+        taskDescription: "This is a test task",
+        allocatedSeconds: 1800,
         completedSeconds: 0,
-        scheduledDate: .now
+        scheduledDate: Date()
     )
 }
-
 
 

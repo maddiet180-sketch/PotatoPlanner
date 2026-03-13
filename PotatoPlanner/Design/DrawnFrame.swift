@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+// Simple ViewModifier to add a hand-drawn border using images.
+// There are multiple frames of different dimensions. frameNumber
+// controls which frame is used.
+
 struct DrawnFrameModifier: ViewModifier {
     var padding: CGFloat = 16
     var capInset: CGFloat = 24

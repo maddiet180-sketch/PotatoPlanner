@@ -9,7 +9,7 @@ import SwiftUI
 internal import Combine
 
 struct MainView: View {
-    @EnvironmentObject var potatoViewModel: PotatoPlannerModel
+    @Environment(PotatoPlannerStore.self) var store
     @State private var showingAddTask: Bool = false
     
     var body: some View {
@@ -18,7 +18,7 @@ struct MainView: View {
                 
                 DateDisplay()
                 
-                if let activePotato = potatoViewModel.activePotato {
+                if let activePotato = store.activePotato {
                     MainPotatoView(potato: activePotato)
                 }
                 
@@ -86,5 +86,5 @@ struct DateDisplay: View {
 
 #Preview {
     RootView()
-        .environmentObject(PotatoPlannerModel())
+        .environment(PotatoPlannerStore.preview)  
 }

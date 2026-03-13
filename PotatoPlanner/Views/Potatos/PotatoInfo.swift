@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct PotatoInfo: View {
-    let potato: Potato
+    let potato: PotatoEntity
     let style: PotatoInfoStyle
     
     enum PotatoInfoStyle {
@@ -41,4 +41,5 @@ struct PotatoInfo: View {
 
 #Preview {
     PotatoInfo(potato: .preview, style: .main)
+        .environment(PotatoPlannerStore.preview)  
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct AddTaskView: View {
-    @EnvironmentObject var potatoViewModel: PotatoPlannerModel
+    @Environment(PotatoPlannerStore.self) var store
     @Environment(\.dismiss) private var dismiss
     
     @State private var title: String = ""
@@ -92,10 +92,15 @@ struct AddTaskView: View {
             TextField("Description (Optional)", text: $description)
         }
         header: {
-            Text("Add Task")
-                .font(.largeTitle.bold())
-                .foregroundStyle(.primaryText)
-                .padding(.bottom, 4)
+            HStack {
+                Spacer()
+                Text("Add Task")
+                    .font(.largeTitle.bold())
+                    .foregroundStyle(.textboxBackground)
+                    .textStroke(width: 1, color: .primaryText)
+                    .padding(.bottom, 4)
+                Spacer()
+            }
         }
         .listRowBackground(Constants.listBackground)
     }
@@ -155,7 +160,7 @@ struct AddTaskView: View {
     
     private var addButton: some View {
         Button("Add") {
-            potatoViewModel.addTask(
+            store.addTask(
                 title: title,
                 description: description,
                 allocatedSeconds: allocatedSeconds,
@@ -169,5 +174,5 @@ struct AddTaskView: View {
 
 #Preview {
     AddTaskView(style: .standard)
-        .environmentObject(PotatoPlannerModel())
+        .environment(PotatoPlannerStore.preview)  
 }

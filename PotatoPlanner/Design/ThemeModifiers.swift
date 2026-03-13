@@ -6,7 +6,9 @@
 //
 
 import SwiftUI
-//PrimaryBackgroundColor
+
+// App-wide constants for background and text
+
 enum AppTheme {
     static let primaryBackground = Color("PrimaryBackgroundColor")
     static let primaryText = Color("PrimaryTextColor")
@@ -26,22 +28,6 @@ struct AppThemeModifier: ViewModifier {
             )
     }
 }
-//
-//struct AppThemeModifier: ViewModifier {
-//    func body(content: Content) -> some View {
-//        ZStack {
-//            Image("TempBackground")
-//                .resizable()
-//                .scaledToFill()
-//                .ignoresSafeArea()
-//            
-//            content
-//                .foregroundStyle(AppTheme.primaryText)
-//                .font(.system(.body, design: .rounded))
-//                .fontWeight(.heavy)
-//        }
-//    }
-//}
 
 extension View {
     func appTheme() -> some View {

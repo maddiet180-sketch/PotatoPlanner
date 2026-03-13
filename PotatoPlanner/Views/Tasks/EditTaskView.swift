@@ -8,10 +8,10 @@
 import SwiftUI
 
 struct EditTaskView: View {
-    @EnvironmentObject var potatoViewModel: PotatoPlannerModel
+    @Environment(PotatoPlannerStore.self) var store
     @Environment(\.dismiss) private var dismiss
     
-    let task: Task
+    let task: TaskEntity
     
     @State private var title: String = ""
     @State private var hours: Int = 0
@@ -34,12 +34,12 @@ struct EditTaskView: View {
         static let tintColor: Color = .accentColor1C
     }
     
-    init(task: Task) {
+    init(task: TaskEntity) {
         self.task = task
         _title = State(initialValue: task.title)
         _hours = State(initialValue: task.allocatedSeconds.asHours)
         _minutes = State(initialValue: task.allocatedSeconds.asRemainingMinutes)
-        _description = State(initialValue: task.description ?? "")
+        _description = State(initialValue: task.taskDescription ?? "")
         _scheduledDate = State(initialValue: task.scheduledDate)
     }
     
@@ -57,8 +57,8 @@ struct EditTaskView: View {
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Save") {
-                            potatoViewModel.editTask(
-                                task: task,
+                            store.updateTask(
+                                task,
                                 title: title,
                                 description: description,
                                 allocatedSeconds: allocatedSeconds,
@@ -96,10 +96,15 @@ struct EditTaskView: View {
             TextField("Task", text: $title)
             TextField("Description (Optional)", text: $description)
         } header: {
-            Text("Edit Task")
-                .font(.largeTitle.bold())
-                .foregroundStyle(.primaryText)
-                .padding(.bottom, 4)
+            HStack {
+                Spacer()
+                Text("Edit Task")
+                    .font(.largeTitle.bold())
+                    .foregroundStyle(.textboxBackground)
+                    .textStroke(width: 1, color: .primaryText)
+                    .padding(.bottom, 4)
+                Spacer()
+            }
         }
         .listRowBackground(Constants.listBackground)
     }
@@ -135,7 +140,7 @@ struct EditTaskView: View {
     var deleteButton: some View {
         Section {
             Button(role: .destructive) {
-                potatoViewModel.deleteTask(task: task)
+                store.deleteTask(task)
                 dismiss()
             }
         }
@@ -144,6 +149,6 @@ struct EditTaskView: View {
 }
 
 #Preview {
-    EditTaskView(task: Task.preview)
-        .environmentObject(PotatoPlannerModel())
+    EditTaskView(task: .preview)
+        .environment(PotatoPlannerStore.preview)  
 }

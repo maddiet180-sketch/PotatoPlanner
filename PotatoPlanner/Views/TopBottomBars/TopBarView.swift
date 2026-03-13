@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TopBarView: View {
-    @EnvironmentObject var potatoViewModel: PotatoPlannerModel
+    @Environment(PotatoPlannerStore.self) var store
     var body: some View {
         HStack{
             Image(systemName: "line.3.horizontal")
@@ -21,7 +21,7 @@ struct TopBarView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(height: 30)
-                    Text("\(potatoViewModel.state.spuds)")
+                    Text("\(store.spuds)")
                         .padding(.trailing, 25)
                         .font(.body)
                 }
@@ -35,5 +35,5 @@ struct TopBarView: View {
 
 #Preview {
     TopBarView()
-        .environmentObject(PotatoPlannerModel())
+        .environment(PotatoPlannerStore.preview)  
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct DailyTasks: View {
-    @EnvironmentObject var potatoViewModel: PotatoPlannerModel
+    @Environment(PotatoPlannerStore.self) var store
     @State var addTaskisShowing: Bool = false
     @State var internalDate: Date = Date.now
     
@@ -40,7 +40,7 @@ struct DailyTasks: View {
         VStack(spacing: 3) {
             listHeader
             
-            let currentTasks = potatoViewModel.isScheduled(on: selectedDate.wrappedValue)
+            let currentTasks = store.tasks(on: selectedDate.wrappedValue)
             if currentTasks.isEmpty {
                 emptyStateView
             } else {
@@ -71,7 +71,7 @@ struct DailyTasks: View {
                 VStack(alignment: .center) {
                     Text(selectedDate.wrappedValue.ttyOrMediumDate())
                         .font(.title2)
-                    Text("\(potatoViewModel.totalDailyFocusTime(on: selectedDate.wrappedValue).asHMS) scheduled")
+                    Text("\(store.totalFocusTime(on: selectedDate.wrappedValue).asHMS) scheduled")
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -86,8 +86,8 @@ struct DailyTasks: View {
     }
     
     private var dailyProgress: Double {
-        let completed = Double(potatoViewModel.completedDailyFocusTime(on: selectedDate.wrappedValue))
-        let total = Double(potatoViewModel.totalDailyFocusTime(on: selectedDate.wrappedValue))
+        let completed = Double(store.completedFocusTime(on: selectedDate.wrappedValue))
+        let total = Double(store.totalFocusTime(on: selectedDate.wrappedValue))
         guard total > 0 else { return 0 }
         return completed / total
     }
@@ -96,7 +96,7 @@ struct DailyTasks: View {
         HStack {
             Text(selectedDate.wrappedValue.ttyOrMediumDate())
                 .font(.title2)
-            Text(" · \(potatoViewModel.totalDailyFocusTime(on: selectedDate.wrappedValue).asHMS)")
+            Text(" · \(store.totalFocusTime(on: selectedDate.wrappedValue).asHMS)")
                 .foregroundStyle(.secondary)
             Spacer()
             Button(action: {addTaskisShowing = true}) {
@@ -113,7 +113,7 @@ struct DailyTasks: View {
                 AddTaskView(style: .compact, scheduledDate: selectedDate)
             }
         }
-        .frame(height: 30) // FIXME: fixed height
+        .frame(height: 30) // FIXME: - fixed height
         .padding()
     }
     
@@ -153,10 +153,10 @@ struct DailyTasks: View {
         }
     }
     
-    private func tasksList(for tasks: [Task]) -> some View {
+    private func tasksList(for tasks: [TaskEntity]) -> some View {
         List {
             ForEach(tasks) { task in
-                MainTaskView(task: task, selectedDate: selectedDate.wrappedValue, style: style)
+                IndividualTaskView(task: task, selectedDate: selectedDate.wrappedValue, style: style)
                     .listRowBackground(Color.clear)
             }
         }
@@ -171,87 +171,7 @@ struct DailyTasks: View {
     }
 }
 
-struct MainTaskView: View {
-    @EnvironmentObject var potatoViewModel: PotatoPlannerModel
-    @State private var showingFocus = false
-    @State private var showingEditTask = false
-    
-    let selectedDate: Date
-    let task: Task
-    let style: DailyTasks.TaskStyle
-        
-    init(task: Task, selectedDate: Date, style: DailyTasks.TaskStyle) {
-        self.task = task
-        self.selectedDate = selectedDate
-        self.style = style
-    }
-    
-    var body: some View {
-        HStack {
-            checkbox
-            taskInfo
-            Spacer()
-            if style == .main {
-                focusButton
-            }
-        }
-    }
-    
-    private var checkbox: some View {
-        if task.isComplete {
-            Image(systemName: "checkmark.square")
-                .padding(.trailing, 10)
-        } else {
-            Image(systemName: "square")
-                .padding(.trailing, 10)
-        }
-    }
-    
-    private var taskInfo: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text(task.title)
-            HStack {
-                Text("\(task.completedSeconds.asHMS) / \(task.allocatedSeconds.asHMS)")
-                    .foregroundStyle(.secondary)
-                editTaskButton
-            }
-        }
-    }
-    
-    private var focusButton: some View {
-        return Button("Focus") {
-            showingFocus = true
-        }
-        .buttonStyle(.bordered)
-        .background(
-            RoundedRectangle(cornerRadius: 13)
-                .fill(focusButtonActive ? .accentColor1B : .primaryText)
-                .opacity(focusButtonActive ? 0.5 : 0.1)
-        )
-        .disabled(!focusButtonActive)
-        .fullScreenCover(isPresented: $showingFocus) {
-            FocusView(task: task)
-        }
-    }
-    
-    private var editTaskButton: some View {
-        Button(action: { showingEditTask = true }) {
-            Image("Edit")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(height: 15)
-        }
-        .sheet(isPresented: $showingEditTask) {
-            EditTaskView(task: task)
-        }
-    }
-    
-    private var focusButtonActive: Bool {
-        Calendar.current.isDateInToday(selectedDate) && !task.isComplete
-    }
-}
-
 #Preview {
     DailyTasks()
-        .environmentObject(PotatoPlannerModel())
+        .environment(PotatoPlannerStore.preview)  
 }

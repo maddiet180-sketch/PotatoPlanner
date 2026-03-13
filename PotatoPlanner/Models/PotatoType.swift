@@ -26,7 +26,8 @@ extension PotatoType {
         return "\(id)_level\(clampedLevel)"
     }
     
-    // How much fertilizer to get from curretn level to the next
+    // How much fertilizer to get from CURRENT level to the next level
+    // For example fertilizerNeeded(for
     func fertilizerNeeded(for level: Int) -> Int {
         let factor = pow((1 + fertilizerMultiplier), Double(level - 1))
         return Int((Double(baseFertilizerPerLevel)*factor))

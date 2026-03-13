@@ -8,15 +8,16 @@
 import SwiftUI
 
 struct DetailedPotatoView: View {
-    @EnvironmentObject var potatoViewModel: PotatoPlannerModel
+    @Environment(PotatoPlannerStore.self) var store
     @Binding var isShowing: Bool
     @State private var displayPotatoType: PotatoType
-    
+    @State private var confirmingPotatoType: PotatoType?
+
     init(isShowing: Binding<Bool>, initialPotato: PotatoType) {
         self._isShowing = isShowing
         self._displayPotatoType = State(initialValue: initialPotato)
     }
-    
+
     var body: some View {
         ZStack {
             Color.primaryText.opacity(0.4)
@@ -24,19 +25,35 @@ struct DetailedPotatoView: View {
                 .onTapGesture {
                     isShowing = false
                 }
-            
+
             HStack {
                 PotatoNavButton(displayPotatoType: $displayPotatoType, direction: .left)
-                
+
                 VStack {
                     DeatiledPotatoCard(displayPotatoType: displayPotatoType)
-                    PotatoActionButton(potatoType: displayPotatoType, style: .large)
+                    PotatoActionButton(
+                        potatoType: displayPotatoType,
+                        style: .large,
+                        onBuyTapped: { confirmingPotatoType = displayPotatoType }
+                    )
                 }
-                
+
                 PotatoNavButton(displayPotatoType: $displayPotatoType, direction: .right)
-                
             }
             .padding(.horizontal)
+
+            if let potatoType = confirmingPotatoType {
+                Color.primaryText.opacity(0.0001)
+                    .ignoresSafeArea()
+                    .onTapGesture { confirmingPotatoType = nil }
+                PurchaseConfirmationPopup(
+                    isShowing: Binding(
+                        get: { confirmingPotatoType != nil },
+                        set: { if !$0 { confirmingPotatoType = nil } }
+                    ),
+                    potatoType: potatoType
+                )
+            }
         }
     }
 }
@@ -88,11 +105,12 @@ struct PotatoNavButton: View {
 }
 
 struct DeatiledPotatoCard: View {
-    @EnvironmentObject var potatoViewModel: PotatoPlannerModel
+    @Environment(PotatoPlannerStore.self) var store
+    
     let displayPotatoType: PotatoType
     
-    private var ownedPotato: Potato? {
-        potatoViewModel.ownedPotato(for: displayPotatoType)
+    private var ownedPotato: PotatoEntity? {
+        store.ownedPotato(for: displayPotatoType)
     }
     
     private var isOwned: Bool {
@@ -133,14 +151,14 @@ struct DeatiledPotatoCard: View {
     }
     
     var potatoLevel: Int {
-        potatoViewModel.ownedPotato(for: displayPotatoType)?.level ?? 1
+        store.ownedPotato(for: displayPotatoType)?.level ?? 1
     }
     
     var transparentBox: some View {
         VStack {
             RoundedRectangle(cornerRadius: 13)
-                .fill(.primaryText)
-                .opacity(0.2)
+                .fill(.accentColor3)
+                .opacity(0.4)
                 .padding()
             Spacer()
         }
@@ -167,6 +185,7 @@ struct DeatiledPotatoCard: View {
     }
 }
 
-//#Preview {
-//    DetailedPotatoView()
-//}
+#Preview {
+    DetailedPotatoView(isShowing: .constant(true), initialPotato: PotatoCatalog.starterKind)
+        .environment(PotatoPlannerStore.preview)
+}

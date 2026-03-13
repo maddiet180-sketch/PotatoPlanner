@@ -28,7 +28,7 @@ enum PotatoCatalog {
             maxLevel: 9,
             baseFertilizerPerLevel: 2,
             fertilizerMultiplier: 1.5,
-            cost: 100
+            cost: 1
         ),
         
 //        PotatoType(
