@@ -23,7 +23,7 @@ struct MainPotatoView: View {
                 Spacer()
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(.accentColor3)
+                        .fill(.accentColor3B)
                         .opacity(0.4)
                         .padding()
                         .padding(.vertical)
@@ -83,7 +83,7 @@ struct MainPotatoView: View {
                 .frame(height: 40)
             Divider()
                 .frame(width: 2, height: 25)
-                .overlay(.accentColor3B)
+                .overlay(.accentColor3C)
             Text(potato.isMaxLevel
                  ? "Max \nLevel"
                  : "Level: \n\(potato.level) of \(potatoType.maxLevel)")
@@ -98,7 +98,7 @@ struct MainPotatoView: View {
 
         return VStack(alignment: .leading) {
             ProgressView(value: potato.isMaxLevel ? 1.0 : progress)
-                .tint(.accentColor3B)
+                .tint(.accentColor3C)
             Text(potato.isMaxLevel
                  ? "\(needed) / \(needed) fertilizer"
                  : "\(count) / \(needed) fertilizer")

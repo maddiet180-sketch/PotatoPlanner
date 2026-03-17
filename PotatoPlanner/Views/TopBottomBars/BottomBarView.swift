@@ -40,7 +40,7 @@ struct BottomBarView: View {
         RoundedRectangle(cornerRadius: 20)
             .fill(Color(.textboxBackground))
             .stroke(.primaryText, lineWidth: 3)
-            .frame(width: .infinity, height: 60)
+            .frame(height: 60)
     }
     
     var middleButton: some View {

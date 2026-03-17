@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct PotatosView: View {
+    let selectedTab: Tab
+    
     @State var showingDetailedPotatoView: Bool = false
     @State private var selectedPotatoType: PotatoType?
     @State private var confirmingPotatoType: PotatoType?
@@ -43,6 +45,9 @@ struct PotatosView: View {
                 }
             }
         }
+        .onChange(of: selectedTab) {
+            showingDetailedPotatoView = false
+        }
     }
 
     private var potatoCards: some View {
@@ -62,7 +67,7 @@ struct PotatosView: View {
 }
 
 #Preview {
-    PotatosView()
-        .environment(PotatoPlannerStore.preview)  
+    PotatosView(selectedTab: .potato)
+        .environment(PotatoPlannerStore.preview)
 }
 

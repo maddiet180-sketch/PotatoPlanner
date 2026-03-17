@@ -26,24 +26,28 @@ struct FocusView: View {
         .autoconnect()
     
     var body: some View {
-        VStack(spacing: 24) {
-            exitButton
-            Spacer()
-            counter
-            Text("You've got this!")
-                .font(.subheadline)
-                .fontWeight(.heavy)
-            Spacer()
-            counterActionButtons
-        }
-        .fontWeight(.heavy)
-        .padding()
-        .background(
-            Image("TemptFocusBackground")
-                .resizable()
-                .scaledToFill()
+        let videoDuration = Double(task.allocatedSeconds - task.completedSeconds)
+        
+        ZStack {
+            Color(.textboxBackground)
                 .ignoresSafeArea()
-        )
+            
+            FocusBackgroundVideo(duration: videoDuration)
+                .ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                exitButton
+                Spacer()
+                counter
+                Text("You've got this!")
+                    .font(.subheadline)
+                    .fontWeight(.heavy)
+                Spacer()
+                counterActionButtons
+            }
+            .fontWeight(.heavy)
+            .padding()
+        }
         .foregroundStyle(.primaryText)
         .onAppear {
             elapsedSeconds = 0
@@ -118,7 +122,7 @@ struct FocusView: View {
     var counter: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12.0)
-                .fill(Color(.accentColor3))
+                .fill(Color(.accentColor3B))
                 .frame(width: 250, height: 100)
                 .shadow(color: Color(.systemGray3), radius: 4.0)
             Text(timeRemianing)
@@ -147,7 +151,7 @@ struct FocusView: View {
         } label: {
             ZStack {
                 Circle()
-                    .fill(.accentColor3)
+                    .fill(.accentColor3B)
                     .frame(width: 50)
                 Image(systemName: "pause")
                     .font(.title3)
@@ -164,7 +168,7 @@ struct FocusView: View {
         } label: {
             ZStack {
                 Circle()
-                    .fill(.accentColor3)
+                    .fill(.accentColor3B)
                     .frame(width: 50)
                 Image(systemName: "play")
                     .font(.title3)

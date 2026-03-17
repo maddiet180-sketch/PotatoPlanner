@@ -13,33 +13,34 @@ struct DailyTasks: View {
     @State var internalDate: Date = Date.now
     
     let style: TaskStyle
-    let externalDate: Binding<Date>?
+    let selectedTab: Tab?
     
+    var externalDate: Binding<Date>?
+    var selectedDate: Binding<Date> {
+        externalDate ?? $internalDate
+    }
     
     enum TaskStyle {
         case main, calendar
     }
     
     // init for main view
-    init(style: TaskStyle = .main) {
+    init(style: TaskStyle = .main, selectedTab: Tab) {
         self.style = style
         self.externalDate = nil
+        self.selectedTab = selectedTab
     }
 
     // intit for calendar view
-    init(selectedDate: Binding<Date>, style: TaskStyle = .calendar) {
+    init(style: TaskStyle = .calendar, selectedDate: Binding<Date>) {
         self.style = style
         self.externalDate = selectedDate
-    }
-    
-    var selectedDate: Binding<Date> {
-        externalDate ?? $internalDate
+        self.selectedTab = nil
     }
     
     var body: some View {
         VStack(spacing: 3) {
             listHeader
-            
             let currentTasks = store.tasks(on: selectedDate.wrappedValue)
             if currentTasks.isEmpty {
                 emptyStateView
@@ -50,6 +51,9 @@ struct DailyTasks: View {
         .padding(.bottom, 12)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(listBackground)
+        .onChange(of: selectedTab) {
+            selectedDate.wrappedValue = Date()
+        }
     }
     
     @ViewBuilder
@@ -81,7 +85,7 @@ struct DailyTasks: View {
             .padding(.top, 10)
             
             ProgressView(value: dailyProgress)
-                .tint(.accentColor2B)
+                .tint(.accentColor3B)
         }
     }
     
@@ -103,7 +107,6 @@ struct DailyTasks: View {
                 ZStack {
                     Circle()
                         .fill(.accentColor1B)
-                        .stroke(.primaryText, lineWidth: 3)
                     Image(systemName: "plus")
                         .font(.title2)
                         .foregroundStyle(.textboxBackground)
@@ -172,6 +175,6 @@ struct DailyTasks: View {
 }
 
 #Preview {
-    DailyTasks()
-        .environment(PotatoPlannerStore.preview)  
+    DailyTasks(selectedTab: .calendar)
+        .environment(PotatoPlannerStore.preview)
 }

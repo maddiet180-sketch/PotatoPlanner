@@ -66,7 +66,7 @@ struct FocusRewardPopup: View {
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 40)
             Text("\(result.spudsEarned) spuds")
-                .font(.title)
+                .font(.title3)
                 .fontWeight(.semibold)
         }
     }
@@ -78,7 +78,7 @@ struct FocusRewardPopup: View {
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 30)
             Text("\(result.fertilizerEarned) fertilizer")
-                .font(.title)
+                .font(.title3)
                 .fontWeight(.semibold)
         }
     }

@@ -12,18 +12,18 @@ enum Tab: Hashable {
 }
 
 struct RootView: View {
-    @State private var selectedTab: Tab = .daily
+    @State private var selectedTab: Tab = .daily    
     @State var showingAddTask: Bool = false
         
     var body: some View {
         TabView(selection: $selectedTab) {
-            MainView()
+            MainView(selectedTab: selectedTab)
                 .tag(Tab.daily)
                 .toolbar(.hidden, for: .tabBar)
-            MonthlyCalendarView()
+            MonthlyCalendarView(selectedTab: selectedTab)
                 .tag(Tab.calendar)
                 .toolbar(.hidden, for: .tabBar)
-            PotatosView()
+            PotatosView(selectedTab: selectedTab)
                 .tag(Tab.potato)
                 .toolbar(.hidden, for: .tabBar)
         }

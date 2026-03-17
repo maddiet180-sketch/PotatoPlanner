@@ -74,7 +74,7 @@ struct PotatoCardView: View {
     private var transparentBox: some View {
         VStack {
             RoundedRectangle(cornerRadius: 13)
-                .fill(.accentColor3)
+                .fill(.accentColor3B)
                 .opacity(0.4)
         }
     }

@@ -176,6 +176,14 @@ extension PotatoPlannerStore {
         task.scheduledDate = scheduledDate
         save()
     }
+    
+    func finishTaskEarly(_ task: TaskEntity) {
+        if activeTaskID == task.id {
+            activeTaskID = nil
+        }
+        task.allocatedSeconds = task.completedSeconds
+        save()
+    }
 
     func deleteTask(_ task: TaskEntity) {
         if activeTaskID == task.id {

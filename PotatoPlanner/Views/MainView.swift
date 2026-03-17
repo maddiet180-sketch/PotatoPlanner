@@ -9,6 +9,8 @@ import SwiftUI
 internal import Combine
 
 struct MainView: View {
+    let selectedTab: Tab
+    
     @Environment(PotatoPlannerStore.self) var store
     @State private var showingAddTask: Bool = false
     
@@ -22,7 +24,7 @@ struct MainView: View {
                     MainPotatoView(potato: activePotato)
                 }
                 
-                DailyTasks(style: .main)
+                DailyTasks(style: .main, selectedTab: selectedTab)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .safeAreaPadding(.top, 40)

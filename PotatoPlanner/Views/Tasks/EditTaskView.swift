@@ -77,6 +77,7 @@ struct EditTaskView: View {
             titleAndDescription
             timeStepper
             datePicker
+            finishEarlyButton
             deleteButton
         }
         .listSectionSpacing(10)
@@ -137,11 +138,31 @@ struct EditTaskView: View {
         .listRowBackground(Constants.listBackground)
     }
     
+    var finishEarlyButton: some View {
+        Section {
+            Button {
+                store.finishTaskEarly(task)
+                dismiss()
+            } label: {
+                HStack {
+                    Image(systemName: "checkmark")
+                    Text("Finish task early")
+                }
+            }
+        }
+        .listRowBackground(Constants.listBackground)
+    }
+    
     var deleteButton: some View {
         Section {
-            Button(role: .destructive) {
+            Button {
                 store.deleteTask(task)
                 dismiss()
+            } label: {
+                HStack {
+                    Image(systemName: "trash")
+                    Text("Delete")
+                }
             }
         }
         .listRowBackground(Constants.listBackground)

@@ -13,7 +13,7 @@ struct AddTaskView: View {
     
     @State private var title: String = ""
     @State private var hours: Int = 0
-    @State private var minutes: Int = 5
+    @State private var minutes: Int = 0
     @State private var description: String = ""
     @State private var internalDate: Date = Date.now
     
@@ -112,7 +112,7 @@ struct AddTaskView: View {
                     Text("\(hours) h")
                 }
                 .padding(.trailing, 25)
-                Stepper(value: $minutes, in: 0...55, step:5) {
+                Stepper(value: $minutes, in: 0...55, step:1) {
                     Text("\(minutes) m")
                 }
             }

@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct MonthlyCalendarView: View {
+    let selectedTab: Tab
+    
     @State private var currentDate: Date = Date()
     @State private var didAppear = false
     
@@ -15,20 +17,23 @@ struct MonthlyCalendarView: View {
         VStack {
             calendarTitle
             mainCalendar
-            DailyTasks(selectedDate: $currentDate, style: .calendar)
+            DailyTasks(style: .calendar, selectedDate: $currentDate)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .safeAreaPadding(.top, 40)
         .safeAreaPadding(.bottom, 90)
         .padding(.horizontal, 20)
         .appTheme()
+        .onChange(of: selectedTab) {
+            currentDate = Date()
+        }
     }
     
     private var calendarTitle: some View {
         Text("Plan Ahead")
             .font(.largeTitle.bold())
             .foregroundStyle(.accentColor1C)
-            .textStroke(width: 1, color: .textboxBackground)
+            .textStroke(width: 0.7, color: .textboxBackground)
     }
     
     private var mainCalendar: some View {
@@ -38,7 +43,7 @@ struct MonthlyCalendarView: View {
             displayedComponents: [.date]
         )
         .datePickerStyle(.graphical)
-        .tint(.accentColor1B)
+        .tint(.accentColor3B)
         .padding()
         .background(calendarBackground)
         .opacity(didAppear ? 1 : 0.99) // Forces redraw
@@ -60,7 +65,7 @@ struct MonthlyCalendarView: View {
 }
 
 #Preview {
-    MonthlyCalendarView()
+    MonthlyCalendarView(selectedTab: .calendar)
         .environment(PotatoPlannerStore.preview)  
 }
 

@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+// Custom dialog box adapted from
+// Mike Mikina on YouTube:
+// https://www.youtube.com/watch?v=K5lj-S3grno
+
 struct PotatoLevelUpPopup: View {
     @State private var offset: CGFloat = 1000
     @State private var flowerOffset: CGFloat = -1500
