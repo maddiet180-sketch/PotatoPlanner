@@ -18,4 +18,17 @@ A cozy iOS productivity app that combines a time-based daily planner with a <i>S
 - **SwiftData**
 - **MVVM architecture**
 
-## Project Structure TBD
+## Project Structure
+```text
+ PotatoPlanner/
+  ├── App/                    # Entry point, owns ModelContainer and Store
+  ├── ViewModels/             # PotatoPlannerStore — all business logic and SwiftData access
+  ├── Models/                 # SwiftData models, PotatoCatalog, SessionResult, Configs
+  ├── Views/
+  │   ├── Tasks/              # Daily view, individual tasks, add/edit, focus timer
+  │   ├── Potatos/            # Potato collection, detail, purchase, equip
+  │   ├── Calendar/           # Monthly calendar view
+  │   └── Overlays/           # Reward, level-up, purchase, confetti popups
+  ├── Design/                 # Custom UI components, video background, theme modifiers
+  └── Utilities/              # Date and Int extensions
+'''
