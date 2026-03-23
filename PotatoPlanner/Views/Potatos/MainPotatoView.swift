@@ -100,7 +100,7 @@ struct MainPotatoView: View {
             ProgressView(value: potato.isMaxLevel ? 1.0 : progress)
                 .tint(.accentColor3C)
             Text(potato.isMaxLevel
-                 ? "\(needed) / \(needed) fertilizer"
+                 ? "Max fertilizer"
                  : "\(count) / \(needed) fertilizer")
                 .font(.caption2)
         }

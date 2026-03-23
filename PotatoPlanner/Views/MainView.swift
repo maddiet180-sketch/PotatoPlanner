@@ -46,7 +46,7 @@ struct DateDisplay: View {
     }
     
     private var fullDate: String {
-        currentDate.mediumDate
+        currentDate.formatted(.dateTime.month(.wide).day().year())
     }
     
     private var time: String {

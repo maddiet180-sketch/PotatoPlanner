@@ -38,6 +38,10 @@ extension TaskEntity {
     var clampedCompletedSeconds: Int {
         min((max(0, completedSeconds)), allocatedSeconds)
     }
+    
+    var secondsToComplete: Int {
+        allocatedSeconds - completedSeconds
+    }
 }
 
 // Conversion helpers

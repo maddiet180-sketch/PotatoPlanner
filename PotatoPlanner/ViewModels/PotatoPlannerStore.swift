@@ -14,9 +14,6 @@ import Observation
 final class PotatoPlannerStore {
 
     // MARK: - Private storage
-
-    // The container is retained here so it is never deallocated for the
-    // lifetime of this store. This prevents ModelContext.reset crashes.
     @ObservationIgnored private let container: ModelContainer
     @ObservationIgnored private var modelContext: ModelContext { container.mainContext }
     @ObservationIgnored private var appStateEntity: AppStateEntity?
@@ -37,6 +34,9 @@ final class PotatoPlannerStore {
 
     /// The task currently being focused on, if any.
     private(set) var activeTaskID: UUID? = nil
+    
+    /// The time at which the active task session was started
+    private(set) var sessionStartDate: Date? = nil
 
     // MARK: - Init
 
@@ -66,6 +66,7 @@ final class PotatoPlannerStore {
             spuds = state.spuds
             activePotatoID = state.activePotatoID
             activeTaskID = state.activeSessionTaskID
+            sessionStartDate = state.sessionStartDate
         } else {
             let state = AppStateEntity()
             modelContext.insert(state)
@@ -80,6 +81,7 @@ final class PotatoPlannerStore {
         appStateEntity?.spuds = spuds
         appStateEntity?.activePotatoID = activePotatoID
         appStateEntity?.activeSessionTaskID = activeTaskID
+        appStateEntity?.sessionStartDate = sessionStartDate
         try? modelContext.save()
     }
 
@@ -134,6 +136,10 @@ extension PotatoPlannerStore {
     func completedFocusTime(on day: Date) -> Int {
         tasks(on: day).reduce(0) { $0 + $1.completedSeconds }
     }
+    
+    func allTasksCompleted(on day: Date) -> Bool {
+        totalFocusTime(on: day) == completedFocusTime(on: day)
+    }
 }
 
 // MARK: - Task CRUD
@@ -146,6 +152,8 @@ extension PotatoPlannerStore {
         allocatedSeconds: Int,
         scheduledDate: Date
     ) {
+        guard allocatedSeconds > 0 else { return }
+        
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedDesc = description?.trimmingCharacters(in: .whitespacesAndNewlines)
         let task = TaskEntity(
@@ -200,12 +208,15 @@ extension PotatoPlannerStore {
 extension PotatoPlannerStore {
 
     func startSession(for task: TaskEntity) {
+        guard activeTaskID != task.id else { return }
         activeTaskID = task.id
+        sessionStartDate = Date.now
         save()
     }
 
     @discardableResult
     func finishSession(with elapsedSeconds: Int) -> SessionResult? {
+        guard elapsedSeconds >= 0 else { return nil }
         guard activeTaskID != nil else { return nil }
         
         guard let task = tasks.first(where: { $0.id == activeTaskID }) else { return nil }
@@ -213,22 +224,27 @@ extension PotatoPlannerStore {
         
         let result = applySpudsAndFertilizer(for: elapsedSeconds)
         activeTaskID = nil
+        sessionStartDate = nil
         save()
         return result
     }
 
     @discardableResult
     private func applySpudsAndFertilizer(for seconds: Int) -> SessionResult {
-        spuds += seconds
+        
+        let spudsEarned: Int = Int((Double(seconds) * Configs.spudsPerSec).rounded())
+        let fertilizerEarned: Int = Int((Double(seconds) * Configs.fertilizerPerSec).rounded())
+        
+        spuds += spudsEarned
 
         guard let activePotatoID,
               let potato = potatoes.first(where: { $0.id == activePotatoID }),
               !potato.isMaxLevel,
               let potatoType = PotatoCatalog.kind(for: potato.typeID) else {
-            return SessionResult(spudsEarned: seconds, fertilizerEarned: 0, levelsGained: false)
+            return SessionResult(spudsEarned: spudsEarned, fertilizerEarned: 0, levelsGained: false)
         }
 
-        potato.fertilizer += seconds
+        potato.fertilizer += fertilizerEarned
         let levelBefore = potato.level
 
         while !potato.isMaxLevel {
@@ -242,8 +258,8 @@ extension PotatoPlannerStore {
         }
 
         return SessionResult(
-            spudsEarned: seconds,
-            fertilizerEarned: seconds,
+            spudsEarned: spudsEarned,
+            fertilizerEarned: fertilizerEarned,
             levelsGained: true ? (potato.level - levelBefore) > 0 : false
         )
     }

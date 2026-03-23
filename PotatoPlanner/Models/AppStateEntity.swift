@@ -13,12 +13,13 @@ import SwiftData
 final class AppStateEntity {
     var spuds: Int
     var activePotatoID: UUID?
-
     var activeSessionTaskID: UUID?
+    var sessionStartDate: Date?
 
     init(spuds: Int = 0, activePotatoID: UUID? = nil) {
         self.spuds = spuds
         self.activePotatoID = activePotatoID
         self.activeSessionTaskID = nil
+        self.sessionStartDate = nil
     }
 }

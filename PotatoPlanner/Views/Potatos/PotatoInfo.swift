@@ -32,7 +32,7 @@ struct PotatoInfo: View {
                 let progress = Double(fertilizerCount) / Double(fertilizerNeeded)
                 ProgressView(value: potato.isMaxLevel ? 1.0 : progress)
                     .tint(.accentColor1C)
-                Text(potato.isMaxLevel ? "\(fertilizerNeeded) / \(fertilizerNeeded) fertilizer" : "\(fertilizerCount) / \(fertilizerNeeded) fertilizer")
+                Text(potato.isMaxLevel ? "Max fertilizer reached" : "\(fertilizerCount) / \(fertilizerNeeded) fertilizer")
                     .font(style == .detailed ? .caption : .caption2)
             }
         }

@@ -12,6 +12,7 @@ import WebKit
 struct FocusView: View {
     @Environment(PotatoPlannerStore.self) var store
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     
     @State private var elapsedSeconds: Int = 0
     @State private var isRunning: Bool = true
@@ -39,7 +40,7 @@ struct FocusView: View {
                 exitButton
                 Spacer()
                 counter
-                Text("You've got this!")
+                Text("You've got this! \(elapsedSeconds)\n\(task.secondsToComplete))\n\(store.sessionStartDate ?? .now)")
                     .font(.subheadline)
                     .fontWeight(.heavy)
                 Spacer()
@@ -50,18 +51,33 @@ struct FocusView: View {
         }
         .foregroundStyle(.primaryText)
         .onAppear {
-            elapsedSeconds = 0
+            guard sessionResult == nil else { return }
             isRunning = true
             store.startSession(for: task)
         }
         .onReceive(timer) {_ in
-            guard isRunning else { return }
-            elapsedSeconds += 1
+            guard isRunning, let startDate = store.sessionStartDate else { return }
+            elapsedSeconds = Int(Date.now.timeIntervalSince(startDate))
 
             if task.allocatedSeconds <= task.totalSeconds(including: elapsedSeconds) {
                 isRunning = false
-                sessionResult = store.finishSession(with: elapsedSeconds)
-                isShowingResult = true
+                if let result = store.finishSession(with: task.secondsToComplete) {
+                    sessionResult = result
+                    isShowingResult = true
+                }
+            }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                guard let startDate = store.sessionStartDate else { return }
+                elapsedSeconds = Int(Date.now.timeIntervalSince(startDate))
+                if task.allocatedSeconds <= task.totalSeconds(including: elapsedSeconds) {
+                    isRunning = false
+                    if let result = store.finishSession(with: task.secondsToComplete) {
+                        sessionResult = result
+                        isShowingResult = true
+                    }
+                }
             }
         }
         .onChange(of: isShowingResult) { _, newValue in
@@ -181,5 +197,5 @@ struct FocusView: View {
 
 #Preview {
     FocusView(task: .preview)
-        .environment(PotatoPlannerStore.preview)  
+        .environment(PotatoPlannerStore.preview)
 }
