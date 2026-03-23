@@ -63,19 +63,7 @@ struct PotatoLevelUpPopup: View {
                     offset = 0
                 }
             }
-            
-            Group {
-                Image("FlowerForeground")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            }
-            .allowsHitTesting(false)
-            .offset(x: 0, y:flowerOffset)
-            .onAppear {
-                withAnimation(.easeInOut.speed(0.05)) {
-                    flowerOffset = 2000
-                }
-            }
+            ConfettiPopup()
         }
     }
     
