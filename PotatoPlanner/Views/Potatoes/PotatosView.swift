@@ -1,5 +1,5 @@
 //
-//  PotatosView.swift
+//  PotatoesView.swift
 //  PotatoPlanner
 //
 //  Created by Maddie Moody on 12/14/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct PotatosView: View {
+struct PotatoesView: View {
     let selectedTab: Tab
     
     @State var showingDetailedPotatoView: Bool = false
@@ -67,7 +67,7 @@ struct PotatosView: View {
 }
 
 #Preview {
-    PotatosView(selectedTab: .potato)
+    PotatoesView(selectedTab: .potato)
         .environment(PotatoPlannerStore.preview)
 }
 

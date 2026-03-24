@@ -1,5 +1,5 @@
 //
-//  DetailedPotatosView.swift
+//  DetailedPotatoesView.swift
 //  PotatoPlanner
 //
 //  Created by Maddie Moody on 12/28/25.
