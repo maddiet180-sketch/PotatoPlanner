@@ -20,23 +20,23 @@ final class PotatoPlannerStore {
 
     // MARK: - Observable state
 
-    /// All tasks, sorted by scheduled date.
+    /// All tasks sorted by day they were scheduled
     private(set) var tasks: [TaskEntity] = []
 
-    /// All owned potatoes.
+    /// All  potatoes that are owned
     private(set) var potatoes: [PotatoEntity] = []
 
-    /// Current spud balance.
+    /// Current spud count
     private(set) var spuds: Int = 0
 
-    /// ID of the currently equipped potato.
+    /// ID of the current equipped potato.
     private(set) var activePotatoID: UUID? = nil
 
-    /// The task currently being focused on, if any.
+    /// The task being focused on right now if there is one
     private(set) var activeTaskID: UUID? = nil
-    
-    /// The time at which the active task session was started
-    private(set) var sessionStartDate: Date? = nil
+
+    /// In-memory session info. Not persisted to disk. In store to prevent reset during view recreation
+    var sessionInfo = SessionInfo()
 
     // MARK: - Init
 
@@ -66,7 +66,6 @@ final class PotatoPlannerStore {
             spuds = state.spuds
             activePotatoID = state.activePotatoID
             activeTaskID = state.activeSessionTaskID
-            sessionStartDate = state.sessionStartDate
         } else {
             let state = AppStateEntity()
             modelContext.insert(state)
@@ -75,13 +74,11 @@ final class PotatoPlannerStore {
         }
     }
 
-    /// Syncs in-memory scalar state back to `AppStateEntity` and saves.
-    /// Call after any mutation.
+    /// Syncs in-memory state with AppStateEntity and saves
     private func save() {
         appStateEntity?.spuds = spuds
         appStateEntity?.activePotatoID = activePotatoID
         appStateEntity?.activeSessionTaskID = activeTaskID
-        appStateEntity?.sessionStartDate = sessionStartDate
         try? modelContext.save()
     }
 
@@ -210,7 +207,7 @@ extension PotatoPlannerStore {
     func startSession(for task: TaskEntity) {
         guard activeTaskID != task.id else { return }
         activeTaskID = task.id
-        sessionStartDate = Date.now
+        sessionInfo = SessionInfo()
         save()
     }
 
@@ -222,10 +219,15 @@ extension PotatoPlannerStore {
         guard let task = tasks.first(where: { $0.id == activeTaskID }) else { return nil }
         task.completedSeconds += elapsedSeconds
         
+        print("finishSession called with: \(elapsedSeconds), activeTaskID: \(String(describing: activeTaskID))")
+        
         let result = applySpudsAndFertilizer(for: elapsedSeconds)
         activeTaskID = nil
-        sessionStartDate = nil
+        sessionInfo = SessionInfo()
         save()
+        
+        print("result obtained: spuds-\(result.spudsEarned), fertilizer-\(result.fertilizerEarned), levels-\(result.levelsGained)")
+        
         return result
     }
 
@@ -287,8 +289,6 @@ extension PotatoPlannerStore {
 // MARK: - Preview
 
 extension PotatoPlannerStore {
-    /// In-memory store for SwiftUI previews.
-    /// The container is retained by the store itself, preventing deallocation.
     static let preview: PotatoPlannerStore = {
         let schema = Schema([TaskEntity.self, PotatoEntity.self, AppStateEntity.self])
         let config = ModelConfiguration(isStoredInMemoryOnly: true)

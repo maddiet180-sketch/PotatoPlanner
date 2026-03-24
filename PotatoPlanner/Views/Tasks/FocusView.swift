@@ -7,40 +7,46 @@
 
 import SwiftUI
 internal import Combine
-import WebKit
 
 struct FocusView: View {
     @Environment(PotatoPlannerStore.self) var store
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.scenePhase) private var scenePhase
-    
-    @State private var elapsedSeconds: Int = 0
+
+    let taskID: UUID
+
+    private var task: TaskEntity? {
+        store.tasks.first { $0.id == taskID }
+    }
+
+    private var elapsedSeconds: Int { store.sessionInfo.elapsedSeconds }
+    private var isPaused: Bool { store.sessionInfo.isPaused }
+
     @State private var isRunning: Bool = true
     @State private var sessionResult: SessionResult?
     @State private var isShowingResult: Bool = false
     @State private var isShowingLevelUp: Bool = false
-    
-    let task: TaskEntity
-    
+
     private let timer = Timer
         .publish(every: 1, on: .main, in: .common)
         .autoconnect()
-    
+
     var body: some View {
-        let videoDuration = Double(task.allocatedSeconds - task.completedSeconds)
-        
         ZStack {
             Color(.textboxBackground)
                 .ignoresSafeArea()
-            
-            FocusBackgroundVideo(duration: videoDuration)
-                .ignoresSafeArea()
+
+            FocusBackgroundVideo(
+                duration: Double(task?.allocatedSeconds ?? 0),
+                initialProgress: Double((task?.completedSeconds ?? 0)),
+                isPaused: isPaused
+            )
+            .ignoresSafeArea()
 
             VStack(spacing: 24) {
                 exitButton
                 Spacer()
                 counter
-                Text("You've got this! \(elapsedSeconds)\n\(task.secondsToComplete))\n\(store.sessionStartDate ?? .now)")
+                Text("You've got this!")
                     .font(.subheadline)
                     .fontWeight(.heavy)
                 Spacer()
@@ -51,34 +57,23 @@ struct FocusView: View {
         }
         .foregroundStyle(.primaryText)
         .onAppear {
-            guard sessionResult == nil else { return }
-            isRunning = true
+            guard sessionResult == nil, let task else { return }
             store.startSession(for: task)
         }
-        .onReceive(timer) {_ in
-            guard isRunning, let startDate = store.sessionStartDate else { return }
-            elapsedSeconds = Int(Date.now.timeIntervalSince(startDate))
-
-            if task.allocatedSeconds <= task.totalSeconds(including: elapsedSeconds) {
-                isRunning = false
-                if let result = store.finishSession(with: task.secondsToComplete) {
-                    sessionResult = result
-                    isShowingResult = true
-                }
-            }
+        .onReceive(timer) { _ in
+            guard isRunning, !isPaused else { return }
+            store.sessionInfo.elapsedSeconds += 1
+            finishSessionIfComplete()
         }
-        .onChange(of: scenePhase) { _, newPhase in
-            if newPhase == .active {
-                guard let startDate = store.sessionStartDate else { return }
-                elapsedSeconds = Int(Date.now.timeIntervalSince(startDate))
-                if task.allocatedSeconds <= task.totalSeconds(including: elapsedSeconds) {
-                    isRunning = false
-                    if let result = store.finishSession(with: task.secondsToComplete) {
-                        sessionResult = result
-                        isShowingResult = true
-                    }
-                }
-            }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)) { _ in
+            guard !isPaused else { return }
+            store.sessionInfo.enterBackgroundDate = Date.now
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            guard let enterDate = store.sessionInfo.enterBackgroundDate else { return }
+            store.sessionInfo.elapsedSeconds += Int(Date.now.timeIntervalSince(enterDate))
+            store.sessionInfo.enterBackgroundDate = nil
+            finishSessionIfComplete()
         }
         .onChange(of: isShowingResult) { _, newValue in
             if !newValue {
@@ -115,13 +110,15 @@ struct FocusView: View {
             }
         }
     }
-    
+
     var exitButton: some View {
         HStack {
             Button {
                 isRunning = false
-                sessionResult = store.finishSession(with: elapsedSeconds)
-                isShowingResult = true
+                if let result = store.finishSession(with: finalFocusedSeconds) {
+                    sessionResult = result
+                    isShowingResult = true
+                }
             } label: {
                 ZStack {
                     Circle()
@@ -134,24 +131,25 @@ struct FocusView: View {
             Spacer()
         }
     }
-    
+
     var counter: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 12.0)
                 .fill(Color(.accentColor3B))
                 .frame(width: 250, height: 100)
                 .shadow(color: Color(.systemGray3), radius: 4.0)
-            Text(timeRemianing)
+            Text(timeRemaining)
                 .font(.largeTitle.bold())
                 .foregroundStyle(.textboxBackground)
                 .textStroke(width: 0.5, color: .primaryText)
         }
     }
-    
-    var timeRemianing: String {
-        (task.totalRemainingSeconds(including: elapsedSeconds)).asHHMMSS
+
+    var timeRemaining: String {
+        guard let task else { return "0:00:00" }
+        return task.totalRemainingSeconds(including: finalFocusedSeconds).asHHMMSS
     }
-    
+
     var counterActionButtons: some View {
         HStack {
             pauseButton
@@ -159,11 +157,10 @@ struct FocusView: View {
         }
         .padding()
     }
-    
+
     var pauseButton: some View {
         Button {
-            isRunning = false
-            
+            store.sessionInfo.isPaused = true
         } label: {
             ZStack {
                 Circle()
@@ -173,14 +170,13 @@ struct FocusView: View {
                     .font(.title3)
             }
         }
-        .disabled(!isRunning)
-        .opacity(isRunning ? 1 : 0.7)
+        .disabled(isPaused)
+        .opacity(isPaused ? 0.5 : 1)
     }
-    
+
     var startButton: some View {
         Button {
-            isRunning = true
-            
+            store.sessionInfo.isPaused = false
         } label: {
             ZStack {
                 Circle()
@@ -190,12 +186,27 @@ struct FocusView: View {
                     .font(.title3)
             }
         }
-        .disabled(isRunning)
-        .opacity(isRunning ? 0.7 : 1)
+        .disabled(!isPaused)
+        .opacity(isPaused ? 1 : 0.5)
+    }
+
+    private var finalFocusedSeconds: Int {
+        guard let task else { return elapsedSeconds }
+        return min(task.secondsToComplete, elapsedSeconds)
+    }
+
+    private func finishSessionIfComplete() {
+        guard let task else { return }
+        guard task.allocatedSeconds <= task.totalSeconds(including: finalFocusedSeconds) else { return }
+        isRunning = false
+        if let result = store.finishSession(with: finalFocusedSeconds) {
+            sessionResult = result
+            isShowingResult = true
+        }
     }
 }
 
 #Preview {
-    FocusView(task: .preview)
+    FocusView(taskID: TaskEntity.preview.id)
         .environment(PotatoPlannerStore.preview)
 }

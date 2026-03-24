@@ -9,10 +9,13 @@ import AVKit
 import SwiftUI
 
 struct FocusBackgroundVideo: UIViewRepresentable {
+
     let duration: Double
+    let initialProgress: Double
+    let isPaused: Bool
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(duration: duration)
+        Coordinator(duration: duration, initialProgress: initialProgress)
     }
 
     func makeUIView(context: Context) -> PlayerView {
@@ -21,13 +24,22 @@ struct FocusBackgroundVideo: UIViewRepresentable {
         return view
     }
 
-    func updateUIView(_ uiView: PlayerView, context: Context) {}
+    func updateUIView(_ uiView: PlayerView, context: Context) {
+        if isPaused {
+            context.coordinator.player?.pause()
+        } else {
+            context.coordinator.player?.play()
+        }
+    }
 
     class Coordinator {
         let duration: Double
+        let initialProgress: Double
+        var player: AVPlayer?
 
-        init(duration: Double) {
+        init(duration: Double, initialProgress: Double) {
             self.duration = duration
+            self.initialProgress = initialProgress
         }
 
         func setup(view: PlayerView) {
@@ -53,7 +65,13 @@ struct FocusBackgroundVideo: UIViewRepresentable {
 
                 let player = AVPlayer(playerItem: AVPlayerItem(asset: composition))
 
+                if self.initialProgress > 0 {
+                    let seekTime = CMTime(seconds: self.initialProgress, preferredTimescale: 600)
+                    await player.seek(to: seekTime, toleranceBefore: .zero, toleranceAfter: .zero)
+                }
+
                 await MainActor.run {
+                    self.player = player
                     view.playerLayer.player = player
                     view.playerLayer.videoGravity = .resizeAspectFill
                     player.play()

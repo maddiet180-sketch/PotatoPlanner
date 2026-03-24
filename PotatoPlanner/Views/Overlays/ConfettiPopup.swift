@@ -19,7 +19,7 @@ struct ConfettiPopup: View {
         .allowsHitTesting(false)
         .offset(x: 0, y:flowerOffset)
         .onAppear {
-            withAnimation(.easeInOut.speed(0.05)) {
+            withAnimation(.easeInOut.speed(0.08)) {
                 flowerOffset = 2000
             }
         }

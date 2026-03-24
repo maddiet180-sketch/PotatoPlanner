@@ -39,7 +39,7 @@ struct DailyTasks: View {
     }
     
     var body: some View {
-        VStack(spacing: 3) {
+        VStack(spacing: 0) {
             listHeader
             let currentTasks = store.tasks(on: selectedDate.wrappedValue)
             if currentTasks.isEmpty {

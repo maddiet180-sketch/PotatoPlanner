@@ -25,6 +25,7 @@ struct IndividualTaskView: View {
     var body: some View {
         HStack {
             checkbox
+                .padding(.trailing, 10)
             taskInfo
             Spacer()
             if style == .main {
@@ -36,10 +37,8 @@ struct IndividualTaskView: View {
     private var checkbox: some View {
         if task.isComplete {
             Image(systemName: "checkmark.square")
-                .padding(.trailing, 10)
         } else {
             Image(systemName: "square")
-                .padding(.trailing, 10)
         }
     }
     
@@ -62,11 +61,11 @@ struct IndividualTaskView: View {
         .background(
             RoundedRectangle(cornerRadius: 13)
                 .fill(focusButtonActive ? .accentColor1B : .primaryText)
-                .opacity(focusButtonActive ? 0.5 : 0.1)
+                .opacity(focusButtonActive ? 0.6 : 0.1)
         )
         .disabled(!focusButtonActive)
         .fullScreenCover(isPresented: $showingFocus) {
-            FocusView(task: task)
+            FocusView(taskID: task.id)
         }
     }
     

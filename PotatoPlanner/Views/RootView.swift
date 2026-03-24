@@ -23,7 +23,7 @@ struct RootView: View {
             MonthlyCalendarView(selectedTab: selectedTab)
                 .tag(Tab.calendar)
                 .toolbar(.hidden, for: .tabBar)
-            PotatosView(selectedTab: selectedTab)
+            PotatoesView(selectedTab: selectedTab)
                 .tag(Tab.potato)
                 .toolbar(.hidden, for: .tabBar)
         }
