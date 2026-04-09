@@ -12,9 +12,9 @@ enum Tab: Hashable {
 }
 
 struct RootView: View {
-    @State private var selectedTab: Tab = .daily    
-    @State var showingAddTask: Bool = false
-        
+    @Environment(PotatoPlannerStore.self) var store
+    @State private var selectedTab: Tab = .daily
+
     var body: some View {
         TabView(selection: $selectedTab) {
             MainView(selectedTab: selectedTab)
@@ -30,16 +30,39 @@ struct RootView: View {
         .safeAreaInset(edge: .bottom) {
             BottomBarView(
                 selectedTab: $selectedTab,
-                onAdd: { showingAddTask = true}
+                onAdd: { store.addEditTaskPresentation = .add(date: store.selectedDate) }
             )
             .padding(.horizontal, 20)
         }
         .safeAreaInset(edge: .top) {
             TopBarView()
-            .padding(.horizontal, 20)
+                .padding(.horizontal, 20)
         }
-        .sheet(isPresented: $showingAddTask) {
-            AddTaskView(style: .standard)
+        .overlay(alignment: .top) {
+            if store.addEditTaskPresentation != nil {
+                ZStack(alignment: .top) {
+                    Color.accentColor3B.opacity(0.0)
+                        .ignoresSafeArea()
+                        .onTapGesture { store.addEditTaskPresentation = nil }
+                    overlayContent
+                }
+                .transition(.move(edge: .bottom))
+            }
+        }
+        .animation(.spring(duration: 0.5), value: store.addEditTaskPresentation != nil)
+        .buttonStyle(SoundButtonStyle())
+        .task { store.applyAudioState() }
+    }
+
+    @ViewBuilder
+    private var overlayContent: some View {
+        switch store.addEditTaskPresentation {
+        case .add(let date):
+            AddEditTaskView(mode: .add, date: date)
+        case .edit(let task):
+            AddEditTaskView(mode: .edit, task: task)
+        case nil:
+            EmptyView()
         }
     }
 }

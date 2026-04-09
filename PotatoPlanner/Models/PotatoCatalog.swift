@@ -21,13 +21,24 @@ enum PotatoCatalog {
         ),
         
         PotatoType(
+            id: "bowiea",
+            displayName: "Boe",
+            plantType: "Bowiea Volubilis",
+            plantInfo: "Vining Onion",
+            maxLevel: 9,
+            baseFertilizerPerLevel: 1,
+            fertilizerMultiplier: 1,
+            cost: 2
+        ),
+        
+        PotatoType(
             id: "cephara",
             displayName: "Cecil",
             plantType: "Stephania Cepharantha",
             plantInfo: "is a very pretty flower.",
             maxLevel: 9,
-            baseFertilizerPerLevel: 2,
-            fertilizerMultiplier: 1.5,
+            baseFertilizerPerLevel: 1,
+            fertilizerMultiplier: 1,
             cost: 1
         ),
         

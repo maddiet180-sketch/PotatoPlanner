@@ -139,9 +139,10 @@ struct FocusView: View {
                 .frame(width: 250, height: 100)
                 .shadow(color: Color(.systemGray3), radius: 4.0)
             Text(timeRemaining)
-                .font(.largeTitle.bold())
+                .font(.custom("Myfont-Regular", size: 45))
+                .textShadow(x: 4, y: 4, color: .primaryText)
                 .foregroundStyle(.textboxBackground)
-                .textStroke(width: 0.5, color: .primaryText)
+                .padding(.top)
         }
     }
 
@@ -201,7 +202,7 @@ struct FocusView: View {
         isRunning = false
         if let result = store.finishSession(with: finalFocusedSeconds) {
             sessionResult = result
-            isShowingResult = true
+            withAnimation(.easeOut(duration: 0.3)) { isShowingResult = true }
         }
     }
 }

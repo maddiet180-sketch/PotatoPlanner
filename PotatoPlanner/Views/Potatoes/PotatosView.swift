@@ -15,20 +15,35 @@ struct PotatoesView: View {
     @State private var confirmingPotatoType: PotatoType?
 
     var body: some View {
-        ScrollView {
-            potatoCards
+        ScrollView() {
+//            ForEach(UIFont.familyNames.sorted(), id: \.self) { family in
+//                        ForEach(UIFont.fontNames(forFamilyName: family), id: \.self) { font in
+//                            Text(font)
+//                                .font(.custom(font, size: 14))
+//                        }
+//                    }
+            VStack(spacing: 0) {
+                Text("Potatoes")
+                    .font(.custom("Myfont-Regular", size: 35))
+                    .textShadow(x: 3, y: 3, color: .primaryText)
+                    .foregroundStyle(.textboxBackground)
+                potatoCards
+            }
         }
         .padding(.horizontal, 20)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .safeAreaPadding(.top, 40)
-        .safeAreaPadding(.bottom, 90)
+        .safeAreaPadding(.bottom, 80)
         .appTheme()
+        .appBackground()
         .overlay {
             if showingDetailedPotatoView {
                 DetailedPotatoView(isShowing: $showingDetailedPotatoView,
                                    initialPotato: selectedPotatoType ?? PotatoCatalog.starterKind)
+                    .transition(.opacity)
             }
         }
+        .animation(.easeInOut(duration: 0.25), value: showingDetailedPotatoView)
         .overlay {
             if let potatoType = confirmingPotatoType {
                 ZStack {

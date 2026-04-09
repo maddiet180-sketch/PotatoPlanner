@@ -10,18 +10,15 @@ import SwiftUI
 struct IndividualTaskView: View {
     @Environment(PotatoPlannerStore.self) var store
     @State private var showingFocus = false
-    @State private var showingEditTask = false
-    
-    let selectedDate: Date
+
     let task: TaskEntity
     let style: DailyTasks.TaskStyle
-        
-    init(task: TaskEntity, selectedDate: Date, style: DailyTasks.TaskStyle) {
+
+    init(task: TaskEntity, style: DailyTasks.TaskStyle) {
         self.task = task
-        self.selectedDate = selectedDate
         self.style = style
     }
-    
+
     var body: some View {
         HStack {
             checkbox
@@ -33,15 +30,21 @@ struct IndividualTaskView: View {
             }
         }
     }
-    
+
     private var checkbox: some View {
         if task.isComplete {
-            Image(systemName: "checkmark.square")
+            Image("SquareCheckmark")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 30)
         } else {
-            Image(systemName: "square")
+            Image("Square")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 30)
         }
     }
-    
+
     private var taskInfo: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text(task.title)
@@ -52,41 +55,42 @@ struct IndividualTaskView: View {
             }
         }
     }
-    
+
     private var focusButton: some View {
-        return Button("Focus") {
+        return Button() {
             showingFocus = true
+        } label: {
+            ZStack {
+                RoundedRectangle(cornerRadius: 13)
+                    .fill(focusButtonActive ? .accentColor1B : .primaryText)
+                    .opacity(focusButtonActive ? 0.6 : 0.1)
+                    .frame(width: 80, height: 33)
+                
+                Text("Focus")
+//                    .font(.custom("Myfont-Regular", size: 20))
+            }
         }
-        .buttonStyle(.bordered)
-        .background(
-            RoundedRectangle(cornerRadius: 13)
-                .fill(focusButtonActive ? .accentColor1B : .primaryText)
-                .opacity(focusButtonActive ? 0.6 : 0.1)
-        )
         .disabled(!focusButtonActive)
         .fullScreenCover(isPresented: $showingFocus) {
             FocusView(taskID: task.id)
         }
     }
-    
+
     private var editTaskButton: some View {
-        Button(action: { showingEditTask = true }) {
+        Button(action: { store.addEditTaskPresentation = .edit(task: task) }) {
             Image("Edit")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(height: 15)
         }
-        .sheet(isPresented: $showingEditTask) {
-            EditTaskView(task: task)
-        }
     }
-    
+
     private var focusButtonActive: Bool {
-        Calendar.current.isDateInToday(selectedDate) && !task.isComplete
+        Calendar.current.isDateInToday(store.selectedDate) && !task.isComplete
     }
 }
 
 #Preview {
-    IndividualTaskView(task: TaskEntity.preview, selectedDate: .now, style: .main)
+    IndividualTaskView(task: TaskEntity.preview, style: .main)
         .environment(PotatoPlannerStore.preview)
 }

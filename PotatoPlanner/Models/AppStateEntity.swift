@@ -14,6 +14,10 @@ final class AppStateEntity {
     var spuds: Int
     var activePotatoID: UUID?
     var activeSessionTaskID: UUID?
+    var isBGMOn: Bool = true
+    var isRainOn: Bool = true
+    var bgmVolume: Float = 0.05
+    var rainVolume: Float = 0.28
 
     init(spuds: Int = 0, activePotatoID: UUID? = nil) {
         self.spuds = spuds

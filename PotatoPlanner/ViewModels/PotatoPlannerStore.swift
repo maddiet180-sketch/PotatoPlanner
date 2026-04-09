@@ -9,6 +9,11 @@ import Foundation
 import SwiftData
 import Observation
 
+enum AddEditTaskPresentation {
+    case add(date: Date)
+    case edit(task: TaskEntity)
+}
+
 @MainActor
 @Observable
 final class PotatoPlannerStore {
@@ -36,7 +41,57 @@ final class PotatoPlannerStore {
     private(set) var activeTaskID: UUID? = nil
 
     /// In-memory session info. Not persisted to disk. In store to prevent reset during view recreation
+    /// The currently selected date across the app. Not persisted.
+    var selectedDate: Date = Date.now
+
     var sessionInfo = SessionInfo()
+
+    /// Controls the add/edit task overlay shown at the RootView level.
+    var addEditTaskPresentation: AddEditTaskPresentation? = nil
+
+    // MARK: - Audio preferences
+
+    var isBGMOn: Bool {
+        get { appStateEntity?.isBGMOn ?? true }
+        set {
+            appStateEntity?.isBGMOn = newValue
+            newValue ? SoundManager.shared.playBGM(volume: bgmVolume) : SoundManager.shared.stopBGM()
+            save()
+        }
+    }
+
+    var isRainOn: Bool {
+        get { appStateEntity?.isRainOn ?? true }
+        set {
+            appStateEntity?.isRainOn = newValue
+            newValue ? SoundManager.shared.playRain(volume: rainVolume) : SoundManager.shared.stopRain()
+            save()
+        }
+    }
+
+    var bgmVolume: Float {
+        get { appStateEntity?.bgmVolume ?? 0.02 }
+        set {
+            appStateEntity?.bgmVolume = newValue
+            SoundManager.shared.setBGMVolume(newValue)
+            save()
+        }
+    }
+
+    var rainVolume: Float {
+        get { appStateEntity?.rainVolume ?? 0.3 }
+        set {
+            appStateEntity?.rainVolume = newValue
+            SoundManager.shared.setRainVolume(newValue)
+            save()
+        }
+    }
+
+    /// Call once when the root view appears — starts audio after the app is fully active.
+    func applyAudioState() {
+        if isBGMOn { SoundManager.shared.playBGM(volume: bgmVolume) }
+        if isRainOn { SoundManager.shared.playRain(volume: rainVolume) }
+    }
 
     // MARK: - Init
 
@@ -124,6 +179,10 @@ extension PotatoPlannerStore {
 
     func tasks(on day: Date, calendar: Calendar = .current) -> [TaskEntity] {
         tasks.filter { calendar.isDate($0.scheduledDate, inSameDayAs: day) }
+    }
+    
+    func hasTasks(on day: Date) -> Bool {
+        !tasks(on: day).isEmpty
     }
 
     func totalFocusTime(on day: Date) -> Int {

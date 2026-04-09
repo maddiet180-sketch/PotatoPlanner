@@ -49,10 +49,10 @@ struct FocusRewardPopup: View {
     private var infoText: some View {
         VStack {
             Text("Great Work!")
-                .font(.largeTitle)
-                .fontWeight(.heavy)
-                .foregroundStyle(.accentColor2A)
+                .font(.custom("Myfont-Regular", size: 30))
+                .textShadow(x: 3, y: 2, color: .primaryText)
                 .textStroke(width: 0.5, color: .primaryText)
+                .foregroundStyle(.accentColor2A)
             Text("you've earned...")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)

@@ -40,6 +40,6 @@ struct PotatoInfo: View {
 }
 
 #Preview {
-    PotatoInfo(potato: .preview, style: .main)
-        .environment(PotatoPlannerStore.preview)  
+    PotatoInfo(potato: .preview, style: .detailed)
+        .environment(PotatoPlannerStore.preview)
 }

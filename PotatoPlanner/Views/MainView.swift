@@ -12,11 +12,10 @@ struct MainView: View {
     let selectedTab: Tab
     
     @Environment(PotatoPlannerStore.self) var store
-    @State private var showingAddTask: Bool = false
     
     var body: some View {
         NavigationStack {
-            VStack(alignment: .center, spacing: 15) {
+            VStack(alignment: .center, spacing: 10) {
                 
                 DateDisplay()
                 
@@ -24,13 +23,17 @@ struct MainView: View {
                     MainPotatoView(potato: activePotato)
                 }
                 
-                DailyTasks(style: .main, selectedTab: selectedTab)
+                DailyTasks(style: .main)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .safeAreaPadding(.top, 40)
-            .safeAreaPadding(.bottom, 90)
+            .safeAreaPadding(.bottom, 80)
             .padding(.horizontal, 20)
             .appTheme()
+            .appBackground()
+            .onChange(of: selectedTab) {
+                store.selectedDate = Date()
+            }
         }
     }
     // FIXME: add geo reader for the top and bottom bars and time text
@@ -55,20 +58,21 @@ struct DateDisplay: View {
     
     var body: some View {
         HStack(alignment: .center) {
-            VStack(alignment: .trailing, spacing: 0) {
+            VStack(alignment: .center, spacing: 0) {
                 Text(weekday)
-                    .font(.largeTitle.bold())
-                    .textStroke(width: 1, color: .primaryText)
+                    .font(.custom("Myfont-Regular", size: 35))
+                    .textShadow(x: 2, y: 4, color: .primaryText)
                 Text(fullDate)
+                    .font(.custom("Myfont-Regular", size: 20))
                     .font(.title3)
             }
             Divider() // FIX ME: make the font scale with size
-                .frame(width: 5, height: 55)
+                .frame(width: 3, height: 55)
                 .overlay(.primaryText)
             Text(time)
-                .font(.system(size: 55))
-                .fontWidth(.condensed)
-                .textStroke(width: 1, color: .primaryText)
+                .font(.custom("Myfont-Regular", size: 45))
+                .textShadow(x: 4, y: 4, color: .primaryText)
+                .padding(.top)
         }
         .foregroundStyle(.textboxBackground)
         .onReceive(timer) { newDate in

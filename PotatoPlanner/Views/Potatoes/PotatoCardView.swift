@@ -22,7 +22,7 @@ struct PotatoCardView: View {
     }
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             cardBackground
 
             if !isOwned {
@@ -31,7 +31,7 @@ struct PotatoCardView: View {
             }
             
             compactCardContent
-            
+
             if !isOwned {
                 Image(systemName: "lock.fill")
                     .foregroundStyle(.textboxBackground)

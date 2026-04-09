@@ -55,6 +55,7 @@ struct DetailedPotatoView: View {
                 )
             }
         }
+        .appTheme()
     }
 }
 
