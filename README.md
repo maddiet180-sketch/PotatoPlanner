@@ -2,9 +2,9 @@
 
 An iOS productivity app that combines a time-based daily planner with a <i>Stephania erecta</i> plant (aka potato plant) progression system.
 <p float="left">
-  <img width="200" src="https://github.com/user-attachments/assets/184c3752-6b42-4ae8-8407-ed1b2329bc53" />
-  <img width="200" src="https://github.com/user-attachments/assets/52933b45-40ce-4a17-a271-a10df1c45f21" />
-  <img width="200" src="https://github.com/user-attachments/assets/56f2fca7-db82-465d-af1c-6db5b2f686bd" />
+  <img width="200" src="https://github.com/user-attachments/assets/8f83b594-184a-4b89-89f9-e446366def65" />
+  <img width="200" src="https://github.com/user-attachments/assets/63171742-3816-4b4b-b8a4-2ba5a1d4e067" />
+  <img width="200" src="https://github.com/user-attachments/assets/3ab60420-78f4-4f0d-8a3c-e5804ba91b12" />
   <img width="200" src="https://github.com/user-attachments/assets/7820789c-9af6-4779-8095-a7eae84a0ae4" />
 </p>
 
